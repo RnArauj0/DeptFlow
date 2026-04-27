@@ -1,0 +1,62 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: debtflow-db
+    environment:
+      POSTGRES_DB: debtflow
+      POSTGRES_USER: debtflow_user
+      POSTGRES_PASSWORD: debtflow_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U debtflow_user -d debtflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - debtflow-network
+
+  app:
+    image: eclipse-temurin:21-jdk
+    container_name: debtflow-backend
+    working_dir: /app
+    volumes:
+      - ./debtFlow:/app
+      - maven_cache:/root/.m2
+    command: ./mvnw spring-boot:run
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/debtflow
+      - DB_USER=debtflow_user
+      - DB_PASS=debtflow_pass
+      - GEMINI_API_KEY=AIzaSyDU0OCmlT9VTDJLHVBHPF6NR2GRdZ-ilYU
+      - SPRING_DOCKER_COMPOSE_ENABLED=false
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - debtflow-network
+
+  frontend:
+    build:
+      context: ./debtflow_frontend
+      dockerfile: Dockerfile
+    container_name: debtflow-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      - debtflow-network
+
+networks:
+  debtflow-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  maven_cache:
