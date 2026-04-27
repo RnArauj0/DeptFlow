@@ -33,7 +33,7 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/debtflow
       - DB_USER=debtflow_user
       - DB_PASS=debtflow_pass
-      - GEMINI_API_KEY=AIzaSyDU0OCmlT9VTDJLHVBHPF6NR2GRdZ-ilYU
+      - GEMINI_API_KEY=---
       - SPRING_DOCKER_COMPOSE_ENABLED=false
     depends_on:
       db:
